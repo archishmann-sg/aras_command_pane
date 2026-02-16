@@ -1,5 +1,6 @@
 import { execute } from "./core/executor";
 import { registerCommands } from "./commands";
+import { getCurrentUser } from "./core/utils";
 
 export function createTerminal(container) {
     const style = document.createElement("style");
@@ -69,19 +70,32 @@ export function createTerminal(container) {
 
     container.appendChild(root);
 
-    const history = [];
     let historyIndex = -1;
     let user = null;
     let resolving = null;
+    let context = {
+        history: [],
+    };
     registerCommands();
+    initContext();
 
     async function resolveCurrentUser() {
         if (user) return user;
         if (resolving) return resolving;
 
         resolving = (async () => {
-            const innovator = top.Innovator();
+            const currentUser = await getCurrentUser();
+
+            user = Object.freeze(currentUser);
+            resolving = null;
+            return user;
         })();
+
+        return resolving;
+    }
+
+    function renderPrompt() {
+        prompt.textContent = `[${context.user.getProperty("login_name")}:${context.cwd}] $ `;
     }
 
     function print(text) {
@@ -93,16 +107,15 @@ export function createTerminal(container) {
 
     async function initContext() {
         const user = await resolveCurrentUser();
-        return {
-            history,
-            user,
-        };
+        context.user = user;
+        context.cwd = "/";
+        renderPrompt();
     }
 
     async function run(command) {
         print(`> ${command}`);
 
-        const result = await execute(command, initContext());
+        const result = await execute(command, context);
 
         if (!result) return;
 
@@ -189,28 +202,29 @@ export function createTerminal(container) {
             const value = input.value.trim();
             if (!value) return;
 
-            history.push(value);
-            historyIndex = history.length;
+            context.history.push(value);
+            historyIndex = context.history.length;
             input.value = "";
 
             run(value);
+            renderPrompt();
             e.preventDefault();
         }
 
         if (e.key === "ArrowUp") {
             if (historyIndex > 0) {
                 historyIndex--;
-                input.value = history[historyIndex];
+                input.value = context.history[historyIndex];
             }
             e.preventDefault();
         }
 
         if (e.key === "ArrowDown") {
-            if (historyIndex < history.length - 1) {
+            if (historyIndex < context.history.length - 1) {
                 historyIndex++;
-                input.value = history[historyIndex];
+                input.value = context.history[historyIndex];
             } else {
-                historyIndex = history.length;
+                historyIndex = context.history.length;
                 input.value = "";
             }
             e.preventDefault();

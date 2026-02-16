@@ -21,14 +21,23 @@ export function getItems(doc) {
 
 // export function getItemAttribute()
 
-export function getCurrentUser() {
+export async function getCurrentUser() {
     const innovator = top.Innovator();
 
     var user = innovator.newItem("User", "get");
     user.setID(innovator.getUserID());
     user.setAttribute("select", "login_name");
+
     var identities = innovator.newItem("Identity", "get");
     identities.setAttribute("select", "name");
 
-    user.addRelationship(identities);
+    var alias = innovator.newItem("Alias");
+    alias.setRelatedItem(identities);
+    alias.setAttribute("select", "id");
+
+    user.addRelationship(alias);
+
+    user = await user.apply();
+
+    return user;
 }

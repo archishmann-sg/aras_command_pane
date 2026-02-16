@@ -53,9 +53,12 @@ import { createTerminal } from "./terminal";
     document.body.appendChild(pane);
 
     let open = false;
-    const terminal = createTerminal(pane);
+    let terminal = null;
 
     function openPane() {
+        if (!terminal) {
+            terminal = createTerminal(pane);
+        }
         pane.style.display = "block";
         mainPage.style.paddingBottom = `${PANE_HEIGHT}px`;
         open = true;
