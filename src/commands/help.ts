@@ -1,3 +1,4 @@
+import { Command } from ".";
 import { listCommands } from "../core/registry";
 
 export default {
@@ -18,4 +19,4 @@ export default {
             })),
         };
     },
-};
+} as Command;

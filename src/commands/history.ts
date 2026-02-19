@@ -1,3 +1,5 @@
+import { Command } from ".";
+
 export default {
     name: "history",
     description: "Show command history",
@@ -26,4 +28,4 @@ export default {
             };
         }
     },
-};
+} as Command;

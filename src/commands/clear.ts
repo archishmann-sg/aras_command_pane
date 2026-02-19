@@ -1,3 +1,5 @@
+import { Command } from ".";
+
 export default {
     name: "clear",
     aliases: ["cls"],
@@ -18,4 +20,4 @@ export default {
             },
         };
     },
-};
+} as Command;

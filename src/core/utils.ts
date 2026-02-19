@@ -1,8 +1,4 @@
-export function parseXML(xmlString) {
-    if (typeof xmlString !== "string") {
-        throw new TypeError("Input must be a string");
-    }
-
+export function parseXML(xmlString: string) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(xmlString, "text/xml");
 
@@ -15,14 +11,18 @@ export function parseXML(xmlString) {
     return doc;
 }
 
-export function getItems(doc) {
+// TODO: Unused function
+export function getItems(doc: any) {
     return Array.from(doc.getElementsByTagName("Item"));
 }
 
 // export function getItemAttribute()
 
 export async function getCurrentUser() {
-    const innovator = top.Innovator();
+    const innovator = top?.Innovator();
+    if (!innovator) {
+        throw new Error("Could not find innovator on top");
+    }
 
     var user = innovator.newItem("User", "get");
     user.setID(innovator.getUserID());
