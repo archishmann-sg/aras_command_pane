@@ -1,13 +1,15 @@
-import { parse } from "./parser";
+import { CommandExecResult } from "../commands";
+import { TerminalContext } from "../terminal";
+import { parse, ParsedCommand } from "./parser";
 import { getCommand } from "./registry";
 
-export async function execute(input, context) {
-    let parsed;
+export async function execute(input: string, context: TerminalContext): Promise<CommandExecResult | null> {
+    let parsed: ParsedCommand | null;
 
     try {
         parsed = parse(input);
     } catch (e) {
-        return errorResult(`Parse error: ${e.message}`);
+        return errorResult(`Parse error: ${e instanceof Error ? e.message : String(e)}`);
     }
 
     if (!parsed) {
@@ -34,19 +36,20 @@ export async function execute(input, context) {
         return result;
     } catch (e) {
         Object.assign(context, before);
-        return errorResult(e.message || `Command '${name}' failed`);
+        return errorResult((e instanceof Error ? e.message : String(e)) || `Command '${name}' failed`);
     }
 }
 
-function snapshot(context) {
+function snapshot(context: TerminalContext): TerminalContext {
     return {
+        history: [...context.history],
         user: context.user,
         cwd: context.cwd,
         env: { ...context.env },
     };
 }
 
-function validate(snapshot, context) {
+function validate(snapshot: TerminalContext, context: TerminalContext) {
     for (const key of Object.keys(snapshot)) {
         if (!(key in context)) {
             throw new Error(`Context key removed: ${key}`);
@@ -66,7 +69,7 @@ function validate(snapshot, context) {
     }
 }
 
-function errorResult(message) {
+function errorResult(message: string): CommandExecResult {
     return {
         type: "error",
         payload: {

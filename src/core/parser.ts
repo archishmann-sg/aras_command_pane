@@ -1,4 +1,10 @@
-export function parse(input) {
+export type ParsedCommand = {
+    command: string;
+    args: string[];
+    raw: string;
+};
+
+export function parse(input: string): ParsedCommand | null {
     if (!input || !input.trim()) {
         return null;
     }
@@ -15,7 +21,7 @@ export function parse(input) {
     };
 }
 
-function tokenize(input) {
+function tokenize(input: string) {
     const tokens = [];
 
     let current = "";

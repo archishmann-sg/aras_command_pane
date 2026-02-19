@@ -1,8 +1,10 @@
+import { Command } from ".";
 import { getCommand, listCommands } from "../core/registry";
 
 export default {
     name: "man",
     description: "Show manual for a command",
+    usage: "TODO",
 
     man: {
         synopsis: "man <command>",
@@ -40,4 +42,4 @@ export default {
             },
         };
     },
-};
+} as Command;
